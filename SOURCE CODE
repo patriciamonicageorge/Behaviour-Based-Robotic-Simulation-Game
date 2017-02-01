@@ -1,0 +1,123 @@
+void Sakura(int FoodClosestDistance,	/* input - closest food in pixels */
+		 int FoodClosestAngle,		/* input - angle in degrees towards closest food */
+		 int RobotClosestDistance,	/* input - closest other robot, in pixels */
+		 int RobotClosestAngle,		/* input - angle in degrees towards closest robot */
+		 int SharkClosestDistance,	/* input - closest shark in pixels */
+		 int SharkClosestAngle,		/* input - angle in degrees towards closest shark */
+		 int CurrentRobotEnergy,		/* input - this robot's current energy (50 - 255) */
+		 int *RobotMoveAngle,		/* output - angle in degrees to move */
+		 int *RobotExpendEnergy)		/* output - energy to expend in motion (cannot exceed Current-50) */
+
+{
+
+	static int scd,sca;
+
+
+	if(SharkClosestDistance>100)
+	{
+
+		if(CurrentRobotEnergy>=150 )
+		{
+			if((FoodClosestDistance<SharkClosestDistance))
+			{
+				(*RobotMoveAngle)=FoodClosestAngle;
+				(*RobotExpendEnergy)=20;
+			}
+			else if(SharkClosestDistance<FoodClosestDistance)
+			{
+				if(sca==SharkClosestAngle)
+				{
+					if(scd>SharkClosestDistance)
+					{
+						(*RobotMoveAngle)=(45+SharkClosestAngle)%360;
+						(*RobotExpendEnergy)=10-SharkClosestDistance/10;
+					}
+				}
+				else
+				{
+					(*RobotMoveAngle)=(135+SharkClosestAngle)%360;
+					if (SharkClosestDistance < 10)
+						(*RobotExpendEnergy)=10;
+					else
+						(*RobotExpendEnergy)=20-SharkClosestDistance/10;
+				}
+			}
+		}
+
+		else if (CurrentRobotEnergy<150 &&  CurrentRobotEnergy>80)
+		{
+			if((FoodClosestAngle!=SharkClosestAngle)&&(FoodClosestDistance<SharkClosestDistance))
+			{
+				(*RobotMoveAngle)=FoodClosestAngle;
+				(*RobotExpendEnergy)=FoodClosestDistance;
+			}
+			else
+			{
+				if(sca==SharkClosestAngle)
+				{
+					if(scd>SharkClosestDistance)
+					{
+						(*RobotMoveAngle)=(45+SharkClosestAngle)%360;
+						(*RobotExpendEnergy)=10-SharkClosestDistance/10;
+					}
+				}
+				else
+				{
+					(*RobotMoveAngle)=(135+SharkClosestAngle)%360;
+					if (SharkClosestDistance < 10)
+						(*RobotExpendEnergy)=10;
+					else
+						(*RobotExpendEnergy)=20-SharkClosestDistance/10;
+				}
+			}
+		}
+		else 
+		{
+
+			(*RobotMoveAngle)=FoodClosestAngle;
+			(*RobotExpendEnergy)=FoodClosestDistance;
+
+		}
+	}
+	else
+	{
+		if(CurrentRobotEnergy>125)
+		{
+			(*RobotMoveAngle)=(150+SharkClosestAngle)%360;
+			if (SharkClosestDistance < 30)
+				(*RobotExpendEnergy)=30;
+			else
+				(*RobotExpendEnergy)=30-SharkClosestDistance/10;
+			if ((*RobotExpendEnergy) < 3)
+				(*RobotExpendEnergy)=3;
+		}
+
+		else
+		{
+			
+			(*RobotMoveAngle)=FoodClosestAngle;
+			(*RobotExpendEnergy)=FoodClosestDistance;
+		}
+
+	}
+	scd=SharkClosestDistance;
+	sca=SharkClosestAngle;
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+GLOBALS.H
+
+void Sakura(int,int,int,int,int,int,int,int *,int *);
+
+------------------------------------------------------------------------------------------------------------------------
+
+EMERGE.C
+
+case 3:	/* My Robot */
+		Sakura(FoodClosestDistance,FoodClosestAngle,
+					RobotClosestDistance,RobotClosestAngle,
+					SharkClosestDistance,SharkClosestAngle,
+					RobotEnergy[i],
+					&RobotMoveAngle,&RobotMoveEnergy);
+		break;
